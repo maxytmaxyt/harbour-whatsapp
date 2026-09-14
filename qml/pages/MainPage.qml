@@ -55,7 +55,7 @@ Page {
         category: "x-nemo.messaging.im"
         remoteActions: [{
             "name":        "default",
-            "displayName": "Öffnen",
+            "displayName": "Open",
             "icon":        "harbour-whatsapp",
             "service":     "net.maxyt.WhatsApp",
             "path":        "/net/maxyt/WhatsApp",
@@ -70,8 +70,8 @@ Page {
         if (diff <= 0) return
         waNotification.summary  = "WhatsApp"
         waNotification.body     = diff === 1
-            ? "Du hast 1 neue Nachricht"
-            : "Du hast " + diff + " neue Nachrichten"
+            ? qsTr("You have 1 new message")
+            : qsTr("You have %1 new messages").arg(diff)
         waNotification.itemCount = unread
         waNotification.publish()
     }
@@ -101,19 +101,19 @@ Page {
     // ── Pull-down menu ─────────────────────────────────────────────
     SilicaPullDownMenu {
         MenuItem {
-            text: qsTr("Einstellungen")
+            text: qsTr("Settings")
             onClicked: pageStack.push(Qt.resolvedUrl("SettingsPage.qml"))
         }
         MenuItem {
-            text: qsTr("Neu laden")
+            text: qsTr("Reload")
             onClicked: webView.reload()
         }
         MenuItem {
-            text: qsTr("Im Browser öffnen")
+            text: qsTr("Open in Browser")
             onClicked: Qt.openUrlExternally(whatsappUrl)
         }
         MenuItem {
-            text: qsTr("Über")
+            text: qsTr("About")
             onClicked: pageStack.push(Qt.resolvedUrl("AboutPage.qml"))
         }
     }
@@ -167,7 +167,7 @@ Page {
 
             Label {
                 anchors.horizontalCenter: parent.horizontalCenter
-                text: qsTr("Verbinde...")
+                text: qsTr("Connecting...")
                 color: "#8696A0"
                 font.pixelSize: Theme.fontSizeSmall
             }
@@ -202,7 +202,7 @@ Page {
 
             Label {
                 anchors.horizontalCenter: parent.horizontalCenter
-                text: qsTr("Keine Verbindung")
+                text: qsTr("No connection")
                 font.pixelSize: Theme.fontSizeLarge
                 color: "#E9EDEF"
                 font.bold: true
@@ -212,7 +212,7 @@ Page {
                 anchors.horizontalCenter: parent.horizontalCenter
                 text: errorText !== ""
                     ? errorText
-                    : qsTr("WhatsApp Web konnte nicht erreicht werden.\nBitte Internetverbindung prüfen.")
+                    : qsTr("Could not reach WhatsApp Web.\nPlease check your internet connection.")
                 color: "#8696A0"
                 font.pixelSize: Theme.fontSizeSmall
                 wrapMode: Text.WordWrap
@@ -230,7 +230,7 @@ Page {
 
                 Label {
                     anchors.centerIn: parent
-                    text: qsTr("Erneut versuchen")
+                    text: qsTr("Try again")
                     color: "white"
                     font.bold: true
                     font.pixelSize: Theme.fontSizeMedium
@@ -426,7 +426,7 @@ Page {
 
             Label {
                 anchors.horizontalCenter: parent.horizontalCenter
-                text: qsTr("Inhalt verborgen")
+                text: qsTr("Content hidden")
                 color: "#8696A0"
                 font.pixelSize: Theme.fontSizeSmall
             }

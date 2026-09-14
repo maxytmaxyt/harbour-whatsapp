@@ -13,6 +13,7 @@ OTHER_FILES += \
     qml/cover/CoverPage.qml \
     qml/pages/MainPage.qml \
     qml/pages/AboutPage.qml \
+    qml/pages/SettingsPage.qml \
     systemd/harbour-whatsapp-daemon.service \
     src/daemon/harbour-whatsapp-daemon.py \
     translations/*.ts
@@ -20,4 +21,7 @@ OTHER_FILES += \
 SAILFISHAPP_ICONS = 86x86 108x108 128x128 172x172
 
 CONFIG += sailfishapp_i18n
-TRANSLATIONS += translations/harbour-whatsapp-de.ts
+TRANSLATIONS += \
+    translations/harbour-whatsapp-de.ts \
+    translations/harbour-whatsapp-en.ts \
+    translations/harbour-whatsapp-fi.ts

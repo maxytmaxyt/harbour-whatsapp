@@ -14,7 +14,7 @@ Page {
             width: parent.width
             spacing: Theme.paddingLarge
 
-            PageHeader { title: qsTr("Über") }
+            PageHeader { title: qsTr("About") }
 
             Rectangle {
                 anchors.horizontalCenter: parent.horizontalCenter
@@ -31,7 +31,7 @@ Page {
 
             Label {
                 anchors.horizontalCenter: parent.horizontalCenter
-                text: "WhatsApp für Sailfish OS"
+                text: qsTr("WhatsApp for Sailfish OS")
                 font.pixelSize: Theme.fontSizeLarge
                 color: Theme.primaryColor
                 font.bold: true
@@ -44,12 +44,12 @@ Page {
                 font.pixelSize: Theme.fontSizeSmall
             }
 
-            SectionHeader { text: qsTr("Über diese App") }
+            SectionHeader { text: qsTr("About this app") }
 
             Label {
                 x: Theme.horizontalPageMargin
                 width: parent.width - 2 * Theme.horizontalPageMargin
-                text: qsTr("Diese App bindet WhatsApp Web (web.whatsapp.com) in eine native Sailfish-OS-Oberfläche ein.\n\nWhatsApp ist ein Produkt von Meta Platforms, Inc. Diese App ist nicht mit WhatsApp oder Meta verbunden oder von ihnen genehmigt.")
+                text: qsTr("This app wraps WhatsApp Web (web.whatsapp.com) in a native Sailfish OS interface.\n\nWhatsApp is a product of Meta Platforms, Inc. This app is not affiliated with or endorsed by WhatsApp or Meta.")
                 wrapMode: Text.WordWrap
                 color: Theme.secondaryColor
                 font.pixelSize: Theme.fontSizeSmall
@@ -60,24 +60,24 @@ Page {
             Label {
                 x: Theme.horizontalPageMargin
                 width: parent.width - 2 * Theme.horizontalPageMargin
-                text: qsTr("• Native Sailfish Silica UI\n• Cover mit Ungelesen-Badge\n• Hintergrund-Benachrichtigungen\n• Privat-Modus (Inhalt im Hintergrund verbergen)\n• Bildschirm anlassen\n• Schriftgröße anpassbar\n• Linke-Rand-Wischgeste zurück\n• Systemd-Daemon für Benachrichtigungen")
+                text: qsTr("• Native Sailfish Silica UI\n• Cover with unread badge\n• Background notifications\n• Privacy mode (hide content in background)\n• Keep screen on\n• Adjustable font size\n• Left-edge swipe to go back\n• Systemd daemon for notifications")
                 wrapMode: Text.WordWrap
                 color: Theme.secondaryColor
                 font.pixelSize: Theme.fontSizeSmall
             }
 
-            SectionHeader { text: qsTr("Voraussetzungen") }
+            SectionHeader { text: qsTr("Requirements") }
 
             Label {
                 x: Theme.horizontalPageMargin
                 width: parent.width - 2 * Theme.horizontalPageMargin
-                text: qsTr("• Aktive Internetverbindung\n• WhatsApp-Konto auf deinem Handy\n• QR-Code beim ersten Start scannen")
+                text: qsTr("• Active internet connection\n• WhatsApp account on your phone\n• Scan QR code on first launch")
                 wrapMode: Text.WordWrap
                 color: Theme.secondaryColor
                 font.pixelSize: Theme.fontSizeSmall
             }
 
-            SectionHeader { text: qsTr("Quellcode") }
+            SectionHeader { text: qsTr("Source Code") }
 
             Label {
                 x: Theme.horizontalPageMargin

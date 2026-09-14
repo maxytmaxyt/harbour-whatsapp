@@ -1,91 +1,91 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
-<TS version="2.1" language="de">
+<TS version="2.1" language="fi">
 <context>
     <name>MainPage</name>
     <message>
         <source>Settings</source>
-        <translation>Einstellungen</translation>
+        <translation>Asetukset</translation>
     </message>
     <message>
         <source>Reload</source>
-        <translation>Neu laden</translation>
+        <translation>Lataa uudelleen</translation>
     </message>
     <message>
         <source>Open in Browser</source>
-        <translation>Im Browser öffnen</translation>
+        <translation>Avaa selaimessa</translation>
     </message>
     <message>
         <source>About</source>
-        <translation>Über</translation>
+        <translation>Tietoja</translation>
     </message>
     <message>
         <source>Connecting...</source>
-        <translation>Verbinde...</translation>
+        <translation>Yhdistetään...</translation>
     </message>
     <message>
         <source>No connection</source>
-        <translation>Keine Verbindung</translation>
+        <translation>Ei yhteyttä</translation>
     </message>
     <message>
         <source>Could not reach WhatsApp Web.
 Please check your internet connection.</source>
-        <translation>WhatsApp Web konnte nicht erreicht werden.
-Bitte Internetverbindung prüfen.</translation>
+        <translation>WhatsApp Webiin ei saada yhteyttä.
+Tarkista internet-yhteytesi.</translation>
     </message>
     <message>
         <source>Try again</source>
-        <translation>Erneut versuchen</translation>
+        <translation>Yritä uudelleen</translation>
     </message>
     <message>
         <source>Content hidden</source>
-        <translation>Inhalt verborgen</translation>
+        <translation>Sisältö piilotettu</translation>
     </message>
     <message>
         <source>Open</source>
-        <translation>Öffnen</translation>
+        <translation>Avaa</translation>
     </message>
     <message>
         <source>You have 1 new message</source>
-        <translation>Du hast 1 neue Nachricht</translation>
+        <translation>Sinulla on 1 uusi viesti</translation>
     </message>
     <message>
         <source>You have %1 new messages</source>
-        <translation>Du hast %1 neue Nachrichten</translation>
+        <translation>Sinulla on %1 uutta viestiä</translation>
     </message>
 </context>
 <context>
     <name>CoverPage</name>
     <message>
         <source>No new messages</source>
-        <translation>Keine neuen Nachrichten</translation>
+        <translation>Ei uusia viestejä</translation>
     </message>
 </context>
 <context>
     <name>AboutPage</name>
     <message>
         <source>About</source>
-        <translation>Über</translation>
+        <translation>Tietoja</translation>
     </message>
     <message>
         <source>About this app</source>
-        <translation>Über diese App</translation>
+        <translation>Tietoja sovelluksesta</translation>
     </message>
     <message>
         <source>WhatsApp for Sailfish OS</source>
-        <translation>WhatsApp für Sailfish OS</translation>
+        <translation>WhatsApp Sailfish OS:lle</translation>
     </message>
     <message>
         <source>This app wraps WhatsApp Web (web.whatsapp.com) in a native Sailfish OS interface.
 
 WhatsApp is a product of Meta Platforms, Inc. This app is not affiliated with or endorsed by WhatsApp or Meta.</source>
-        <translation>Diese App bindet WhatsApp Web (web.whatsapp.com) in eine native Sailfish-OS-Oberfläche ein.
+        <translation>Tämä sovellus käärii WhatsApp Webin (web.whatsapp.com) natiiviin Sailfish OS -käyttöliittymään.
 
-WhatsApp ist ein Produkt von Meta Platforms, Inc. Diese App ist nicht mit WhatsApp oder Meta verbunden oder von ihnen genehmigt.</translation>
+WhatsApp on Meta Platforms, Inc:n tuote. Tämä sovellus ei ole sidoksissa WhatsAppiin tai Metaan eikä heidän hyväksymänsä.</translation>
     </message>
     <message>
         <source>Features</source>
-        <translation>Features</translation>
+        <translation>Ominaisuudet</translation>
     </message>
     <message>
         <source>• Native Sailfish Silica UI
@@ -96,81 +96,81 @@ WhatsApp ist ein Produkt von Meta Platforms, Inc. Diese App ist nicht mit WhatsA
 • Adjustable font size
 • Left-edge swipe to go back
 • Systemd daemon for notifications</source>
-        <translation>• Native Sailfish Silica UI
-• Cover mit Ungelesen-Badge
-• Hintergrund-Benachrichtigungen
-• Privat-Modus (Inhalt im Hintergrund verbergen)
-• Bildschirm anlassen
-• Schriftgröße anpassbar
-• Linke-Rand-Wischgeste zurück
-• Systemd-Daemon für Benachrichtigungen</translation>
+        <translation>• Natiivi Sailfish Silica -käyttöliittymä
+• Kansi lukemattomien viestien merkillä
+• Taustaviestit
+• Yksityisyystila (piilota sisältö taustalla)
+• Pidä näyttö päällä
+• Säädettävä fonttikoko
+• Vasemman reunan pyyhkäisy takaisin
+• Systemd-daemon ilmoituksille</translation>
     </message>
     <message>
         <source>Requirements</source>
-        <translation>Voraussetzungen</translation>
+        <translation>Vaatimukset</translation>
     </message>
     <message>
         <source>• Active internet connection
 • WhatsApp account on your phone
 • Scan QR code on first launch</source>
-        <translation>• Aktive Internetverbindung
-• WhatsApp-Konto auf deinem Handy
-• QR-Code beim ersten Start scannen</translation>
+        <translation>• Aktiivinen internet-yhteys
+• WhatsApp-tili puhelimessasi
+• Skannaa QR-koodi ensimmäisellä käynnistyskerralla</translation>
     </message>
     <message>
         <source>Source Code</source>
-        <translation>Quellcode</translation>
+        <translation>Lähdekoodi</translation>
     </message>
 </context>
 <context>
     <name>SettingsPage</name>
     <message>
         <source>Settings</source>
-        <translation>Einstellungen</translation>
+        <translation>Asetukset</translation>
     </message>
     <message>
         <source>Privacy</source>
-        <translation>Datenschutz</translation>
+        <translation>Yksityisyys</translation>
     </message>
     <message>
         <source>Privacy mode</source>
-        <translation>Privat-Modus</translation>
+        <translation>Yksityisyystila</translation>
     </message>
     <message>
         <source>Hides content when the app goes to the background — no WhatsApp content in the app switcher or cover preview.</source>
-        <translation>Versteckt den Inhalt wenn die App in den Hintergrund wechselt — kein WA-Inhalt im App-Switcher oder Cover-Vorschau.</translation>
+        <translation>Piilottaa sisällön kun sovellus siirtyy taustalle — ei WhatsApp-sisältöä sovelluksen vaihtajassa tai kannen esikatselussa.</translation>
     </message>
     <message>
         <source>Display</source>
-        <translation>Anzeige</translation>
+        <translation>Näyttö</translation>
     </message>
     <message>
         <source>Keep screen on</source>
-        <translation>Bildschirm anlassen</translation>
+        <translation>Pidä näyttö päällä</translation>
     </message>
     <message>
         <source>Prevents the screen from locking automatically while the app is open.</source>
-        <translation>Verhindert das automatische Sperren des Bildschirms solange die App offen ist.</translation>
+        <translation>Estää näytön lukittumisen automaattisesti sovelluksen ollessa auki.</translation>
     </message>
     <message>
         <source>Font size</source>
-        <translation>Schriftgröße</translation>
+        <translation>Fonttikoko</translation>
     </message>
     <message>
         <source>Adjusts the font size of the WhatsApp interface.</source>
-        <translation>Passt die Schriftgröße der WhatsApp-Oberfläche an.</translation>
+        <translation>Säätää WhatsApp-käyttöliittymän fonttikokoa.</translation>
     </message>
     <message>
         <source>Preview: Hello World!</source>
-        <translation>Vorschau: Hallo Welt!</translation>
+        <translation>Esikatselu: Hei maailma!</translation>
     </message>
     <message>
         <source>Reset</source>
-        <translation>Zurücksetzen</translation>
+        <translation>Nollaa</translation>
     </message>
     <message>
         <source>Restore defaults</source>
-        <translation>Standardeinstellungen wiederherstellen</translation>
+        <translation>Palauta oletusasetukset</translation>
     </message>
 </context>
 </TS>

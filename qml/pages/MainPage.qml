@@ -15,6 +15,7 @@ Page {
     property bool hasError:  false
     property string errorText: ""
     property bool webReady:  false
+    property var  unreadChats: []   // [{name, count}] from DOM
 
     // ── DBus: app daemon ───────────────────────────────────────────
     DBusInterface {
@@ -68,12 +69,60 @@ Page {
     function sendNotification(unread, prev) {
         var diff = unread - prev
         if (diff <= 0) return
-        waNotification.summary  = "WhatsApp"
-        waNotification.body     = diff === 1
-            ? qsTr("You have 1 new message")
-            : qsTr("You have %1 new messages").arg(diff)
+        waNotification.summary   = "WhatsApp"
         waNotification.itemCount = unread
+
+        // Build body from chat names if available, else fallback
+        if (unreadChats.length > 0) {
+            var names = []
+            for (var i = 0; i < Math.min(unreadChats.length, 3); i++) {
+                var c = unreadChats[i]
+                names.push(c.count > 1 ? c.name + " (" + c.count + ")" : c.name)
+            }
+            waNotification.body = names.join(", ")
+        } else {
+            waNotification.body = diff === 1
+                ? qsTr("You have 1 new message")
+                : qsTr("You have %1 new messages").arg(diff)
+        }
         waNotification.publish()
+    }
+
+    function readUnreadChats() {
+        webView.runJavaScript(
+            '(function() {' +
+            '  var results = [];' +
+            '  var items = document.querySelectorAll(' +
+            '    "[data-testid=\'cell-frame-container\']");' +
+            '  for (var i = 0; i < items.length && results.length < 5; i++) {' +
+            '    var badge = items[i].querySelector(' +
+            '      "[data-testid=\'icon-unread-count\'], ' +
+            '       [aria-label*=\'unread\'], ' +
+            '       .unread-count, ._3P3VE");' +
+            '    if (!badge) continue;' +
+            '    var nameEl = items[i].querySelector(' +
+            '      "[data-testid=\'cell-frame-title\'], ' +
+            '       .DgN7A span, ._21S-L span");' +
+            '    var name = nameEl ? nameEl.innerText.trim() : "";' +
+            '    var cnt = parseInt(badge.innerText) || 1;' +
+            '    if (name) results.push({name: name, count: cnt});' +
+            '  }' +
+            '  return JSON.stringify(results);' +
+            '})()',
+            function(result) {
+                try {
+                    if (result && result !== "null") {
+                        var chats = JSON.parse(result)
+                        if (chats && chats.length > 0) {
+                            unreadChats = chats
+                            // Forward to daemon with chat names for richer notifications
+                            daemonDbus.call('UpdateUnreadWithChats',
+                                [appWindow.unreadCount, JSON.stringify(chats)])
+                        }
+                    }
+                } catch(e) {}
+            }
+        )
     }
 
     // ── App lifecycle ──────────────────────────────────────────────
@@ -248,6 +297,16 @@ Page {
         }
     }
 
+    // ── Notification delay timer (waits for DOM chat-name read) ──────
+    Timer {
+        id: notifyTimer
+        interval: 600
+        repeat:   false
+        property int pendingUnread: 0
+        property int pendingPrev:   0
+        onTriggered: sendNotification(pendingUnread, pendingPrev)
+    }
+
     // ── WebView ────────────────────────────────────────────────────
     WebView {
         id: webView
@@ -285,7 +344,14 @@ Page {
             appWindow.unreadCount = newCount
             daemonDbus.call('UpdateUnreadCount', [newCount])
             if (!appWindow.applicationActive && newCount > prevCount) {
-                sendNotification(newCount, prevCount)
+                // Read chat names from DOM before showing notification
+                readUnreadChats()
+                // Small delay to let the JS call complete, then notify
+                notifyTimer.pendingUnread = newCount
+                notifyTimer.pendingPrev   = prevCount
+                notifyTimer.restart()
+            } else if (newCount === 0) {
+                unreadChats = []
             }
         }
 

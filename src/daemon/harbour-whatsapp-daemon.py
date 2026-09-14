@@ -62,10 +62,21 @@ class WhatsAppNotifier(dbus.service.Object):
 
     @dbus.service.method(DBUS_NAME, in_signature='i', out_signature='')
     def UpdateUnreadCount(self, count):
-        """Called by QML app when WebView title changes."""
-        count = int(count)
+        """Called by QML app when WebView title changes."""        count = int(count)
         log.info('Unread count updated: %d', count)
-        self._handle_count_change(count)
+        self._handle_count_change(count, chat_names=[])
+
+    @dbus.service.method(DBUS_NAME, in_signature='is', out_signature='')
+    def UpdateUnreadWithChats(self, count, chats_json):
+        """Called by QML app with unread count + JSON list of chat names."""
+        import json as _json
+        count = int(count)
+        try:
+            chats = _json.loads(str(chats_json))
+        except Exception:
+            chats = []
+        log.info('Unread count updated: %d, chats: %s', count, chats)
+        self._handle_count_change(count, chat_names=chats)
 
     @dbus.service.method(DBUS_NAME, in_signature='b', out_signature='')
     def SetAppActive(self, active):
@@ -88,7 +99,7 @@ class WhatsAppNotifier(dbus.service.Object):
 
     # ── Internal logic ───────────────────────────────────────────────
 
-    def _handle_count_change(self, new_count):
+    def _handle_count_change(self, new_count, chat_names=None):
         if new_count == self.unread_count:
             return
         self.unread_count = new_count
@@ -98,14 +109,14 @@ class WhatsAppNotifier(dbus.service.Object):
         # Only notify if app is NOT in foreground and count went up
         if not self.app_active and new_count > self.last_notified_count:
             diff = new_count - self.last_notified_count
-            self._send_notification(new_count, diff)
+            self._send_notification(new_count, diff, chat_names or [])
             self.last_notified_count = new_count
 
         if new_count == 0:
             self.last_notified_count = 0
             self._clear_notification()
 
-    def _send_notification(self, total, new_msgs):
+    def _send_notification(self, total, new_msgs, chat_names=None):
         """Send a Sailfish OS notification via libresourceqt/nemo dbus."""
         try:
             bus = dbus.SessionBus()
@@ -115,10 +126,18 @@ class WhatsAppNotifier(dbus.service.Object):
             )
             iface = dbus.Interface(notify, 'org.freedesktop.Notifications')
 
-            if new_msgs == 1:
-                body = 'Du hast 1 neue Nachricht'
+            # Build body: prefer chat names, fall back to generic count
+            if chat_names:
+                parts = []
+                for c in chat_names[:3]:
+                    name = c.get('name', '') if isinstance(c, dict) else str(c)
+                    cnt  = c.get('count', 1) if isinstance(c, dict) else 1
+                    parts.append(f'{name} ({cnt})' if cnt > 1 else name)
+                body = ', '.join(parts)
+            elif new_msgs == 1:
+                body = '1 neue Nachricht'
             else:
-                body = f'Du hast {new_msgs} neue Nachrichten'
+                body = f'{new_msgs} neue Nachrichten'
 
             hints = {
                 'category': dbus.String('im.received'),
@@ -194,7 +213,8 @@ def start_socket_server(notifier):
                 data, _ = server.recvfrom(256)
                 payload = json.loads(data.decode())
                 if 'unread' in payload:
-                    GLib.idle_add(notifier._handle_count_change, payload['unread'])
+                    chats = payload.get('chats', [])
+                    GLib.idle_add(notifier._handle_count_change, payload['unread'], chats)
             except Exception as e:
                 log.debug('Socket recv error: %s', e)
 

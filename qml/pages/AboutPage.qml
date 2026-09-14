@@ -7,25 +7,20 @@ Page {
 
     SilicaFlickable {
         anchors.fill: parent
-        contentHeight: column.height
+        contentHeight: column.height + Theme.paddingLarge
 
         Column {
             id: column
             width: parent.width
             spacing: Theme.paddingLarge
 
-            PageHeader {
-                title: qsTr("About")
-            }
+            PageHeader { title: qsTr("Über") }
 
             Rectangle {
                 anchors.horizontalCenter: parent.horizontalCenter
-                width: 120
-                height: 120
-                radius: 60
+                width: 120; height: 120; radius: 60
                 color: "#25D366"
-
-                Text {
+                Label {
                     anchors.centerIn: parent
                     text: "✓✓"
                     font.pixelSize: 48
@@ -36,7 +31,7 @@ Page {
 
             Label {
                 anchors.horizontalCenter: parent.horizontalCenter
-                text: "WhatsApp for Sailfish OS"
+                text: "WhatsApp für Sailfish OS"
                 font.pixelSize: Theme.fontSizeLarge
                 color: Theme.primaryColor
                 font.bold: true
@@ -44,50 +39,55 @@ Page {
 
             Label {
                 anchors.horizontalCenter: parent.horizontalCenter
-                text: "Version 1.0.0"
+                text: "Version 1.2.0"
                 color: Theme.secondaryColor
                 font.pixelSize: Theme.fontSizeSmall
             }
 
-            SectionHeader {
-                text: qsTr("About this app")
-            }
+            SectionHeader { text: qsTr("Über diese App") }
 
             Label {
                 x: Theme.horizontalPageMargin
                 width: parent.width - 2 * Theme.horizontalPageMargin
-                text: qsTr("This app provides access to WhatsApp Web (web.whatsapp.com) wrapped in a native Sailfish OS interface.\n\nWhatsApp is a product of Meta Platforms, Inc. This app is not affiliated with or endorsed by WhatsApp or Meta.")
+                text: qsTr("Diese App bindet WhatsApp Web (web.whatsapp.com) in eine native Sailfish-OS-Oberfläche ein.\n\nWhatsApp ist ein Produkt von Meta Platforms, Inc. Diese App ist nicht mit WhatsApp oder Meta verbunden oder von ihnen genehmigt.")
                 wrapMode: Text.WordWrap
                 color: Theme.secondaryColor
                 font.pixelSize: Theme.fontSizeSmall
             }
 
-            SectionHeader {
-                text: qsTr("Requirements")
-            }
+            SectionHeader { text: qsTr("Features") }
 
             Label {
                 x: Theme.horizontalPageMargin
                 width: parent.width - 2 * Theme.horizontalPageMargin
-                text: qsTr("• Active internet connection\n• WhatsApp account on your phone\n• Scan QR code on first launch")
+                text: qsTr("• Native Sailfish Silica UI\n• Cover mit Ungelesen-Badge\n• Hintergrund-Benachrichtigungen\n• Privat-Modus (Inhalt im Hintergrund verbergen)\n• Bildschirm anlassen\n• Schriftgröße anpassbar\n• Linke-Rand-Wischgeste zurück\n• Systemd-Daemon für Benachrichtigungen")
                 wrapMode: Text.WordWrap
                 color: Theme.secondaryColor
                 font.pixelSize: Theme.fontSizeSmall
             }
 
-            SectionHeader {
-                text: qsTr("Source Code")
-            }
+            SectionHeader { text: qsTr("Voraussetzungen") }
 
             Label {
                 x: Theme.horizontalPageMargin
                 width: parent.width - 2 * Theme.horizontalPageMargin
-                text: "github.com/maxytmaxyt/Whatsapp-Sailfish-os"
+                text: qsTr("• Aktive Internetverbindung\n• WhatsApp-Konto auf deinem Handy\n• QR-Code beim ersten Start scannen")
+                wrapMode: Text.WordWrap
+                color: Theme.secondaryColor
+                font.pixelSize: Theme.fontSizeSmall
+            }
+
+            SectionHeader { text: qsTr("Quellcode") }
+
+            Label {
+                x: Theme.horizontalPageMargin
+                width: parent.width - 2 * Theme.horizontalPageMargin
+                text: "github.com/maxytmaxyt/harbour-whatsapp"
                 color: Theme.highlightColor
                 font.pixelSize: Theme.fontSizeSmall
                 MouseArea {
                     anchors.fill: parent
-                    onClicked: Qt.openUrlExternally("https://github.com/maxytmaxyt/Whatsapp-Sailfish-os")
+                    onClicked: Qt.openUrlExternally("https://github.com/maxytmaxyt/harbour-whatsapp")
                 }
             }
 

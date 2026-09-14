@@ -2,6 +2,7 @@ import QtQuick 2.6
 import Sailfish.Silica 1.0
 import QtWebView 1.1
 import org.nemomobile.notifications 1.0
+import Qt.labs.settings 1.0
 import "pages"
 import "cover"
 
@@ -10,36 +11,47 @@ ApplicationWindow {
     initialPage: mainPage
     cover: coverPage
 
-    property int unreadCount: 0
-    property bool isConnected: true
-    property string pageTitle: "WhatsApp"
-    // Whether we managed to connect to the daemon via DBus
-    property bool daemonAvailable: false
+    // ── Persisted settings ─────────────────────────────────────────
+    Settings {
+        id: appSettings
+        property bool privacyMode:   false
+        property bool keepScreenOn:  false
+        property int  fontSize:      16
+    }
 
-    // ── DBus connection to daemon ──────────────────────────────────
-    // We use a Timer to poll DBus since QtDBus isn't always available
-    // as a QML import; the daemon also pushes via signals.
+    // ── Runtime state ──────────────────────────────────────────────
+    property int    unreadCount:      0
+    property bool   isConnected:      true
+    property string pageTitle:        "WhatsApp"
+    property bool   daemonAvailable:  false
+    property bool   pendingReload:    false   // set by cover action
+
+    // Settings aliases (bound to persisted Settings)
+    property bool   privacyMode:    appSettings.privacyMode
+    property bool   keepScreenOn:   appSettings.keepScreenOn
+    property int    fontSize:       appSettings.fontSize
+
+    onPrivacyModeChanged:  appSettings.privacyMode  = privacyMode
+    onKeepScreenOnChanged: appSettings.keepScreenOn = keepScreenOn
+    onFontSizeChanged:     appSettings.fontSize     = fontSize
+
+    // ── DBus poll heartbeat ────────────────────────────────────────
     Timer {
         id: daemonPollTimer
-        interval: 30000   // 30s background poll
+        interval: 30000
         running: true
         repeat: true
-        onTriggered: {
-            // The WebView title already updates unreadCount live while
-            // the app is open; this timer is a fallback heartbeat.
-        }
+        onTriggered: { /* WebView title drives unreadCount live */ }
     }
 
     // Called by MainPage when WebView title changes
     function onUnreadChanged(count) {
         unreadCount = count
-        // Tell daemon via DBus call in MainPage
     }
 
-    // Called when app goes to foreground
+    // Reset badge briefly after app is foregrounded
     onApplicationActiveChanged: {
         if (applicationActive) {
-            // App opened – unread shown, reset badge after short delay
             resetBadgeTimer.start()
         }
     }
@@ -48,18 +60,9 @@ ApplicationWindow {
         id: resetBadgeTimer
         interval: 2000
         repeat: false
-        onTriggered: {
-            // Don't reset count here – let WebView title drive it
-        }
+        onTriggered: { /* WebView title keeps count current */ }
     }
 
-    Component {
-        id: mainPage
-        MainPage {}
-    }
-
-    Component {
-        id: coverPage
-        CoverPage {}
-    }
+    Component { id: mainPage; MainPage {} }
+    Component { id: coverPage; CoverPage {} }
 }

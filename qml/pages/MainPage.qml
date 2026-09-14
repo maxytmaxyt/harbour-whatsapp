@@ -8,35 +8,51 @@ Page {
     id: page
     allowedOrientations: Orientation.All
 
-    readonly property string userAgent: "Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36"
-    readonly property string whatsappUrl: "https://web.whatsapp.com"
+    readonly property string userAgent:    "Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36"
+    readonly property string whatsappUrl:  "https://web.whatsapp.com"
 
     property bool isLoading: true
-    property bool hasError: false
+    property bool hasError:  false
     property string errorText: ""
-    property bool webReady: false
+    property bool webReady:  false
 
-    // ── DBus interface to daemon ───────────────────────────────────
+    // ── DBus: app daemon ───────────────────────────────────────────
     DBusInterface {
         id: daemonDbus
-        service:   'net.maxyt.WhatsApp'
-        path:      '/net/maxyt/WhatsApp'
-        iface:     'net.maxyt.WhatsApp'
-        bus:       DBus.SessionBus
+        service: 'net.maxyt.WhatsApp'
+        path:    '/net/maxyt/WhatsApp'
+        iface:   'net.maxyt.WhatsApp'
+        bus:     DBus.SessionBus
+        Component.onCompleted: call('SetAppActive', [true])
+    }
 
-        Component.onCompleted: {
-            // Tell daemon app is now active (foreground)
-            call('SetAppActive', [true])
+    // ── DBus: MCE – prevent screen blanking ───────────────────────
+    DBusInterface {
+        id: mceDbus
+        service: 'com.nokia.mce'
+        path:    '/com/nokia/mce/request'
+        iface:   'com.nokia.mce.request'
+        bus:     DBus.SystemBus
+    }
+
+    // Calls MCE every 25 s while keepScreenOn is active and app is in foreground
+    Timer {
+        id: keepScreenTimer
+        interval: 25000
+        repeat:   true
+        running:  appWindow.keepScreenOn && appWindow.applicationActive
+        onTriggered: mceDbus.call('req_display_blanking_pause', [])
+        onRunningChanged: {
+            if (running) mceDbus.call('req_display_blanking_pause', [])
         }
     }
 
-    // ── Sailfish Notification ──────────────────────────────────────
+    // ── Sailfish notification ──────────────────────────────────────
     Notification {
         id: waNotification
         appName:  "WhatsApp"
         appIcon:  "harbour-whatsapp"
         category: "x-nemo.messaging.im"
-        // remoteActions: open app when tapped
         remoteActions: [{
             "name":        "default",
             "displayName": "Öffnen",
@@ -52,8 +68,8 @@ Page {
     function sendNotification(unread, prev) {
         var diff = unread - prev
         if (diff <= 0) return
-        waNotification.summary = "WhatsApp"
-        waNotification.body = diff === 1
+        waNotification.summary  = "WhatsApp"
+        waNotification.body     = diff === 1
             ? "Du hast 1 neue Nachricht"
             : "Du hast " + diff + " neue Nachrichten"
         waNotification.itemCount = unread
@@ -66,22 +82,31 @@ Page {
         onApplicationActiveChanged: {
             if (appWindow.applicationActive) {
                 daemonDbus.call('SetAppActive', [true])
-                // Clear notifications when user opens app
                 waNotification.close()
+                // Handle cover reload action
+                if (appWindow.pendingReload && webReady) {
+                    webView.reload()
+                    appWindow.pendingReload = false
+                }
             } else {
                 daemonDbus.call('SetAppActive', [false])
             }
+        }
+        // Inject font size whenever setting changes
+        onFontSizeChanged: {
+            if (webReady) injectFontSize()
         }
     }
 
     // ── Pull-down menu ─────────────────────────────────────────────
     SilicaPullDownMenu {
-        // Larger touch area for mobile
+        MenuItem {
+            text: qsTr("Einstellungen")
+            onClicked: pageStack.push(Qt.resolvedUrl("SettingsPage.qml"))
+        }
         MenuItem {
             text: qsTr("Neu laden")
-            onClicked: {
-                webView.reload()
-            }
+            onClicked: webView.reload()
         }
         MenuItem {
             text: qsTr("Im Browser öffnen")
@@ -99,7 +124,7 @@ Page {
         color: "#111B21"
     }
 
-    // ── Loading screen ─────────────────────────────────────────────
+    // ── Loading overlay ────────────────────────────────────────────
     Rectangle {
         id: loadingOverlay
         anchors.fill: parent
@@ -107,28 +132,22 @@ Page {
         z: 10
         visible: opacity > 0
         opacity: isLoading && !hasError ? 1.0 : 0.0
-
         Behavior on opacity { FadeAnimation { duration: 350 } }
 
         Column {
             anchors.centerIn: parent
             spacing: Theme.paddingLarge * 1.5
 
-            // Animated logo circle
             Rectangle {
                 anchors.horizontalCenter: parent.horizontalCenter
-                width: 96
-                height: 96
-                radius: 48
+                width: 96; height: 96; radius: 48
                 color: "#25D366"
-
                 SequentialAnimation on scale {
                     running: isLoading
                     loops: Animation.Infinite
                     NumberAnimation { to: 1.08; duration: 800; easing.type: Easing.InOutSine }
                     NumberAnimation { to: 1.0;  duration: 800; easing.type: Easing.InOutSine }
                 }
-
                 Label {
                     anchors.centerIn: parent
                     text: "✓✓"
@@ -161,7 +180,7 @@ Page {
         }
     }
 
-    // ── Error screen ───────────────────────────────────────────────
+    // ── Error overlay ──────────────────────────────────────────────
     Rectangle {
         id: errorOverlay
         anchors.fill: parent
@@ -201,14 +220,12 @@ Page {
                 width: parent.width
             }
 
-            // Mobile-friendly large button
             Rectangle {
                 anchors.horizontalCenter: parent.horizontalCenter
                 width: parent.width * 0.75
                 height: Theme.itemSizeMedium
                 radius: height / 2
                 color: retryArea.pressed ? "#1DA851" : "#25D366"
-
                 Behavior on color { ColorAnimation { duration: 100 } }
 
                 Label {
@@ -218,12 +235,11 @@ Page {
                     font.bold: true
                     font.pixelSize: Theme.fontSizeMedium
                 }
-
                 MouseArea {
                     id: retryArea
                     anchors.fill: parent
                     onClicked: {
-                        hasError = false
+                        hasError  = false
                         isLoading = true
                         webView.url = whatsappUrl
                     }
@@ -236,11 +252,8 @@ Page {
     WebView {
         id: webView
         anchors.fill: parent
-
-        // Mobile-optimized: enable viewport scaling
-        settings.javaScriptEnabled:  true
+        settings.javaScriptEnabled:   true
         settings.localStorageEnabled: true
-
         url: whatsappUrl
 
         onLoadingChanged: {
@@ -249,81 +262,120 @@ Page {
                 isLoading = true
                 hasError  = false
                 break
-
             case WebView.LoadSucceededStatus:
                 isLoading = false
                 hasError  = false
                 webReady  = true
                 injectTweaks()
+                injectFontSize()
                 break
-
             case WebView.LoadFailedStatus:
-                isLoading  = false
-                hasError   = true
-                errorText  = loadRequest.errorString
+                isLoading = false
+                hasError  = true
+                errorText = loadRequest.errorString
                 break
             }
         }
 
         onTitleChanged: {
             appWindow.pageTitle = title
-
-            // Parse "(3) WhatsApp" → unread = 3
-            var match = title.match(/^\((\d+)\)/)
-            var newCount = match ? parseInt(match[1]) : 0
+            var match     = title.match(/^\((\d+)\)/)
+            var newCount  = match ? parseInt(match[1]) : 0
             var prevCount = appWindow.unreadCount
             appWindow.unreadCount = newCount
-
-            // Forward to daemon
             daemonDbus.call('UpdateUnreadCount', [newCount])
-
-            // Send local notification if app is in background
             if (!appWindow.applicationActive && newCount > prevCount) {
                 sendNotification(newCount, prevCount)
             }
         }
 
         function injectTweaks() {
-            // 1. Override UA → Android Chrome
+            // 1. Android Chrome User-Agent
             runJavaScript(
                 'Object.defineProperty(navigator,"userAgent",{get:function(){return "'
                 + userAgent + '";}});'
             )
-
-            // 2. Stub out Notification API (we handle it natively)
+            // 2. Disable web Notification API (we handle it natively)
             runJavaScript('window.Notification=undefined;')
-
-            // 3. Mobile viewport + smooth scroll
+            // 3. Mobile viewport
             runJavaScript(
                 'var m=document.querySelector("meta[name=viewport]");'
                 + 'if(!m){m=document.createElement("meta");m.name="viewport";document.head.appendChild(m);}'
                 + 'm.content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no";'
                 + 'document.body.style.overscrollBehavior="none";'
             )
-
-            // 4. Hide WA "use on phone" banner & download-app prompts
+            // 4. Hide WA "use on phone" / download-app banners
             runJavaScript(
                 '(function(){'
                 + 'var s=document.createElement("style");'
-                + 's.textContent='
-                + '"[data-testid=\\"intro-md-beta-logo-dark\\"],'
+                + 's.textContent="'
+                + '[data-testid=\\"intro-md-beta-logo-dark\\"],'
                 + '[data-testid=\\"intro-md-beta-logo-light\\"],'
-                + '.landing-wrapper .landing-main { display:none!important; }'
-                + '.app-wrapper-web { padding-bottom: 0!important; }"'
-                + ';document.head.appendChild(s);'
+                + '.landing-wrapper .landing-main{display:none!important;}'
+                + '.app-wrapper-web{padding-bottom:0!important;}";'
+                + 'document.head.appendChild(s);'
                 + '})()'
             )
-
             // 5. Larger touch targets for Sailfish finger size
             runJavaScript(
                 '(function(){'
                 + 'var s=document.createElement("style");'
                 + 's.textContent="'
-                + '* { -webkit-tap-highlight-color: rgba(37,211,102,0.2)!important; }'
-                + '[data-testid] { min-height: 48px; }'
-                + '";document.head.appendChild(s);'
+                + '*{-webkit-tap-highlight-color:rgba(37,211,102,0.2)!important;}'
+                + '[data-testid]{min-height:48px;}";'
+                + 'document.head.appendChild(s);'
                 + '})()'
             )
+            // 6. Smooth scrolling everywhere
+            runJavaScript(
+                '(function(){'
+                + 'var s=document.createElement("style");'
+                + 's.textContent="html{scroll-behavior:smooth;}'
+                + '*{-webkit-overflow-scrolling:touch;}";'
+                + 'document.head.appendChild(s);'
+                + '})()'
+            )
+        }
+
+        function injectFontSize() {
+            var zoom = appWindow.fontSize / 16.0
+            runJavaScript(
+                'document.documentElement.style.fontSize="' + appWindow.fontSize + 'px";'
+            )
+        }
+    }
+
+    // ── Left-edge swipe zone (Sailfish-style back gesture) ─────────
+    // Thin transparent strip on the left — swipe right to go back
+    MouseArea {
+        id: leftEdgeSwipe
+        width:  Theme.paddingLarge * 1.5   // ~30 px
+        anchors {
+            left:   parent.left
+            top:    parent.top
+            bottom: parent.bottom
+        }
+        z: 50   // above WebView, below overlays
+        enabled: webView.canGoBack
+
+        property real startX: 0
+
+        onPressed:  startX = mouseX
+        onReleased: {
+            var dx = mouseX - startX
+            if (dx > Theme.itemSizeSmall && webView.canGoBack) {
+                webView.goBack()
+            }
+        }
+
+        // Visual hint: subtle green glow when active
+        Rectangle {
+            anchors.fill: parent
+            color: "transparent"
+            border.color: "#25D366"
+            border.width: leftEdgeSwipe.pressed ? 2 : 0
+            opacity: 0.6
+            Behavior on border.width { NumberAnimation { duration: 80 } }
         }
     }
 
@@ -333,6 +385,51 @@ Page {
         if (event.key === Qt.Key_Back && webView.canGoBack) {
             webView.goBack()
             event.accepted = true
+        }
+    }
+
+    // ── Privacy screen ─────────────────────────────────────────────
+    // Shown immediately when app leaves foreground and privacy mode is on.
+    // Prevents WA content from appearing in the cover thumbnail / task switcher.
+    Rectangle {
+        id: privacyOverlay
+        anchors.fill: parent
+        z: 200
+        color: "#111B21"
+        visible: !appWindow.applicationActive && appWindow.privacyMode
+
+        Column {
+            anchors.centerIn: parent
+            spacing: Theme.paddingLarge
+
+            Rectangle {
+                anchors.horizontalCenter: parent.horizontalCenter
+                width: 88; height: 88; radius: 44
+                color: "#1A2A35"
+                border.color: "#25D366"
+                border.width: 2
+
+                Label {
+                    anchors.centerIn: parent
+                    text: "🔒"
+                    font.pixelSize: 36
+                }
+            }
+
+            Label {
+                anchors.horizontalCenter: parent.horizontalCenter
+                text: "WhatsApp"
+                color: "#E9EDEF"
+                font.pixelSize: Theme.fontSizeLarge
+                font.bold: true
+            }
+
+            Label {
+                anchors.horizontalCenter: parent.horizontalCenter
+                text: qsTr("Inhalt verborgen")
+                color: "#8696A0"
+                font.pixelSize: Theme.fontSizeSmall
+            }
         }
     }
 }

@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=WhatsApp
+Name[de]=WhatsApp
+Comment=WhatsApp Web for Sailfish OS
+Comment[de]=WhatsApp Web für Sailfish OS
+Icon=harbour-whatsapp
+Exec=harbour-whatsapp
+X-Nemo-Application-Type=silica-qt5

@@ -8,8 +8,9 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Sailfish OS](https://img.shields.io/badge/Sailfish%20OS-3.0%2B-blue.svg)](https://sailfishos.org)
 [![QML](https://img.shields.io/badge/Language-QML%20%2F%20C%2B%2B-orange.svg)](https://doc.qt.io/qt-5/qtqml-index.html)
+[![Version](https://img.shields.io/badge/Version-1.2.0-brightgreen.svg)](https://github.com/maxytmaxyt/harbour-whatsapp/releases)
 
-Wraps [WhatsApp Web](https://web.whatsapp.com) in a proper **Silica UI** with cover page, background notifications, and native Sailfish gestures.
+Wraps [WhatsApp Web](https://web.whatsapp.com) in a proper **Silica UI** with cover page, background notifications, privacy mode, and native Sailfish gestures.
 
 </div>
 
@@ -22,13 +23,16 @@ Wraps [WhatsApp Web](https://web.whatsapp.com) in a proper **Silica UI** with co
 | 🌊 **Native Silica UI** | Looks and feels like a real Sailfish OS app |
 | 📱 **QtWebView embed** | Full WhatsApp Web rendered on-device |
 | 🎨 **WhatsApp dark theme** | Matches the `#111B21` palette of WA Web |
-| 🔄 **Pull-down menu** | Reload · Open in Browser · About |
+| 🔄 **Pull-down menu** | Settings · Reload · Open in Browser · About |
 | 📟 **Cover with unread badge** | Unread message count visible on the home screen |
-| 🌐 **Android Chrome User-Agent** | Forces WhatsApp Web to serve the mobile interface |
-| ✅ **Error page + retry** | Graceful handling of connection failures |
 | 🔔 **Background daemon** | Python daemon via D-Bus & systemd for notifications |
-| ↩️ **Hardware back button** | Navigates back in web history |
-| 🇩🇪 **German translation** | Included out of the box |
+| 🔒 **Privacy mode** | Hides content when the app is in the background |
+| 💡 **Keep screen on** | Prevents auto-lock while the app is open (MCE D-Bus) |
+| 🔤 **Adjustable font size** | Slider in settings, persisted across restarts |
+| ↩️ **Back navigation** | Left-edge swipe gesture + hardware back button |
+| 🌐 **Android Chrome UA** | Forces WhatsApp Web to serve the mobile interface |
+| ✅ **Error page + retry** | Graceful handling of connection failures |
+| 🌍 **Translations** | German 🇩🇪 · English 🇬🇧 · Finnish 🇫🇮 |
 
 ---
 
@@ -36,6 +40,9 @@ Wraps [WhatsApp Web](https://web.whatsapp.com) in a proper **Silica UI** with co
 
 - **Sailfish OS** 3.0 or newer
 - `qt5-qtwebview` installed on the device
+- `nemo-qml-plugin-dbus-qt5`
+- `nemo-qml-plugin-notifications-qt5`
+- `python3` + `python3-dbus` (for the notification daemon)
 - Internet connection
 - A WhatsApp account (QR code scan on first launch)
 
@@ -97,25 +104,37 @@ harbour-whatsapp/
 │   └── daemon/
 │       └── harbour-whatsapp-daemon.py    # Background notification daemon (Python)
 ├── qml/
-│   ├── harbour-whatsapp.qml             # ApplicationWindow root
+│   ├── harbour-whatsapp.qml             # ApplicationWindow root + persisted settings
 │   ├── pages/
 │   │   ├── MainPage.qml                 # WebView + loading / error states
-│   │   └── AboutPage.qml               # About screen
+│   │   ├── AboutPage.qml               # About screen
+│   │   └── SettingsPage.qml            # Settings: privacy, screen, font size
 │   └── cover/
 │       └── CoverPage.qml               # Sailfish cover with unread count
+├── icons/
+│   ├── 86x86/harbour-whatsapp.png      # App icon (Sailfish home screen)
+│   ├── 108x108/harbour-whatsapp.png
+│   ├── 128x128/harbour-whatsapp.png
+│   └── 172x172/harbour-whatsapp.png
 ├── dbus/
 │   └── net.maxyt.WhatsApp.service       # D-Bus session service file
 ├── systemd/
 │   └── harbour-whatsapp-daemon.service  # systemd user unit for the daemon
 ├── translations/
-│   └── harbour-whatsapp-de.ts          # German translation source
+│   ├── harbour-whatsapp-de.ts          # German translation
+│   ├── harbour-whatsapp-en.ts          # English translation
+│   └── harbour-whatsapp-fi.ts          # Finnish translation
 ├── rpm/
 │   └── harbour-whatsapp.spec           # RPM packaging spec
 ├── .github/
-│   └── workflows/
-│       └── build.yml                   # CI: builds RPMs for all 3 architectures
+│   ├── workflows/
+│   │   └── build.yml                   # CI: builds RPMs for all 3 architectures
+│   └── ISSUE_TEMPLATE/
+│       ├── feature_request.md          # Feature request template
+│       └── bug_report.md               # Bug report template
 ├── harbour-whatsapp.pro                # Qt project file
 ├── harbour-whatsapp.desktop            # Sailfish desktop entry
+├── FEATURE_WISHLIST.md                 # Community feature wishlist
 ├── CONTRIBUTING.md                     # Contribution guide
 └── LICENSE                            # MIT
 ```
@@ -139,9 +158,14 @@ harbour-whatsapp/
 └──────────────┬──────────────────────┘
                │
 ┌──────────────▼──────────────────────┐
-│   MainPage.qml (QtWebView)          │
-│   → web.whatsapp.com                │
-│   → Android Chrome UA               │
+│   harbour-whatsapp.qml              │
+│   (ApplicationWindow + Settings)    │
+│   ├── MainPage.qml (QtWebView)      │
+│   │   → web.whatsapp.com            │
+│   │   → Android Chrome UA           │
+│   │   → Privacy overlay             │
+│   ├── SettingsPage.qml              │
+│   └── AboutPage.qml                 │
 └─────────────────────────────────────┘
 
 Background:
@@ -162,6 +186,13 @@ Background:
 - **Notifications** — The background daemon exposes unread counts via D-Bus. Push notifications from WhatsApp's server are not available (Sailfish has no FCM bridge).
 - **User-Agent** — An Android Chrome UA is injected so WA Web serves its mobile-optimised interface instead of the desktop one.
 - **Resource limits** — The daemon is capped at 5 % CPU and 64 MB RAM to be a good citizen on the device.
+- **Privacy mode** — When enabled, a solid overlay is shown immediately when the app leaves the foreground, preventing WhatsApp content from appearing in the task switcher or cover preview.
+
+---
+
+## 💡 Feature requests
+
+Got an idea? Check the [**Feature Wishlist**](FEATURE_WISHLIST.md) to see what's already planned, then open a [💡 Feature Request](https://github.com/maxytmaxyt/harbour-whatsapp/issues/new?template=feature_request.md) issue — I read every one!
 
 ---
 

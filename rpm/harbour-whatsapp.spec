@@ -26,7 +26,7 @@ Wraps web.whatsapp.com in a native Sailfish OS application with:
 - Screen keep-alive via MCE D-Bus
 - Left-edge swipe gesture for browser back navigation
 - Settings page with all toggles
-- German localization
+- German, English and Finnish localization
 
 %prep
 %setup -q

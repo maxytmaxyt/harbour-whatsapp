@@ -10,10 +10,9 @@ on:
   workflow_dispatch:
 
 env:
-  # Neuestes verfügbares SDK-Image (coderus/sailfishos-platform-sdk)
-  # Siehe: https://hub.docker.com/r/coderus/sailfishos-platform-sdk/tags
+  # Neuestes verfügbares SDK-Image
+  # https://hub.docker.com/r/coderus/sailfishos-platform-sdk/tags
   SFOS_RELEASE: 5.0.0.43
-  # Timeout für Docker-Layer-Downloads
   SEGMENT_DOWNLOAD_TIMEOUT_MINS: 5
 
 jobs:
@@ -28,11 +27,11 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
-          fetch-depth: 0   # Vollständige History für git describe
+          fetch-depth: 0
 
-      - name: Vorbereitung – RPMS-Verzeichnis anlegen
+      - name: RPMS-Verzeichnis anlegen
         run: mkdir -p RPMS
 
       - name: Build ${{ matrix.arch }} mit Sailfish SDK ${{ env.SFOS_RELEASE }}
@@ -45,14 +44,13 @@ jobs:
         run: ls -lh RPMS/
 
       - name: Artefakte hochladen
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: harbour-whatsapp-${{ matrix.arch }}-rpm
           path: RPMS/*.rpm
           if-no-files-found: error
           retention-days: 30
 
-  # Release-Job – läuft nur bei v*-Tags
   release:
     name: GitHub Release erstellen
     runs-on: ubuntu-22.04
@@ -64,23 +62,22 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
-      # Alle drei Architektur-Artefakte herunterladen
       - name: Artefakte herunterladen (aarch64)
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: harbour-whatsapp-aarch64-rpm
           path: release-rpms
 
       - name: Artefakte herunterladen (armv7hl)
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: harbour-whatsapp-armv7hl-rpm
           path: release-rpms
 
       - name: Artefakte herunterladen (i486)
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: harbour-whatsapp-i486-rpm
           path: release-rpms
@@ -89,7 +86,7 @@ jobs:
         run: ls -lh release-rpms/
 
       - name: Release erstellen und RPMs hochladen
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           name: "${{ github.ref_name }}"
           draft: false

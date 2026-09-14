@@ -4,7 +4,6 @@ import Sailfish.Silica 1.0
 CoverBackground {
     id: cover
 
-    // WhatsApp green gradient background
     Rectangle {
         anchors.fill: parent
         gradient: Gradient {
@@ -21,18 +20,26 @@ CoverBackground {
         }
         spacing: Theme.paddingMedium
 
-        // Icon
+        // Logo
         Rectangle {
             anchors.horizontalCenter: parent.horizontalCenter
-            width: 64
-            height: 64
-            radius: 32
+            width: 72
+            height: 72
+            radius: 36
             color: "#25D366"
 
-            Text {
+            // Pulse animation when there are unread messages
+            SequentialAnimation on scale {
+                running: appWindow.unreadCount > 0
+                loops: Animation.Infinite
+                NumberAnimation { to: 1.1; duration: 900; easing.type: Easing.InOutSine }
+                NumberAnimation { to: 1.0; duration: 900; easing.type: Easing.InOutSine }
+            }
+
+            Label {
                 anchors.centerIn: parent
                 text: "✓✓"
-                font.pixelSize: 24
+                font.pixelSize: 26
                 color: "white"
                 font.bold: true
             }
@@ -50,10 +57,14 @@ CoverBackground {
         Rectangle {
             anchors.horizontalCenter: parent.horizontalCenter
             visible: appWindow.unreadCount > 0
-            width: Math.max(32, unreadLabel.width + 16)
-            height: 32
-            radius: 16
-            color: "#25D366"
+            width:  Math.max(40, unreadLabel.width + 20)
+            height: 40
+            radius: 20
+            color:  "#25D366"
+
+            // Bounce in when count appears
+            scale: visible ? 1.0 : 0.0
+            Behavior on scale { NumberAnimation { duration: 200; easing.type: Easing.OutBack } }
 
             Label {
                 id: unreadLabel
@@ -68,21 +79,17 @@ CoverBackground {
         Label {
             anchors.horizontalCenter: parent.horizontalCenter
             visible: appWindow.unreadCount === 0
-            text: qsTr("No new messages")
+            text: qsTr("Keine neuen Nachrichten")
             color: "#8696A0"
             font.pixelSize: Theme.fontSizeTiny
         }
     }
 
+    // Cover actions
     CoverActionList {
-        id: coverAction
-
         CoverAction {
             iconSource: "image://theme/icon-cover-refresh"
-            onTriggered: {
-                // Bring app to front and reload
-                appWindow.activate()
-            }
+            onTriggered: appWindow.activate()
         }
     }
 }

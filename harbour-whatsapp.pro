@@ -2,7 +2,7 @@ TARGET = harbour-whatsapp
 
 CONFIG += sailfishapp sailfishapp_no_deploy_qml
 
-QT += webview
+QT += webview dbus
 
 SOURCES += src/harbour-whatsapp.cpp
 
@@ -12,7 +12,9 @@ OTHER_FILES += \
     qml/harbour-whatsapp.qml \
     qml/cover/CoverPage.qml \
     qml/pages/MainPage.qml \
-    qml/pages/ErrorPage.qml \
+    qml/pages/AboutPage.qml \
+    systemd/harbour-whatsapp-daemon.service \
+    src/daemon/harbour-whatsapp-daemon.py \
     translations/*.ts
 
 SAILFISHAPP_ICONS = 86x86 108x108 128x128 172x172

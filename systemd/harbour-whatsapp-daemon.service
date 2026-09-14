@@ -1,0 +1,21 @@
+[Unit]
+Description=WhatsApp background notification daemon
+After=network.target dbus.service
+Wants=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/share/harbour-whatsapp/daemon/harbour-whatsapp-daemon.py
+Restart=on-failure
+RestartSec=10s
+# Restart at most 5 times in 2 minutes
+StartLimitIntervalSec=120
+StartLimitBurst=5
+
+# Resource limits – be a good citizen
+CPUQuota=5%
+MemoryMax=64M
+Nice=10
+
+[Install]
+WantedBy=default.target

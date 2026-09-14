@@ -1,0 +1,4 @@
+[D-BUS Service]
+Name=net.maxyt.WhatsApp
+Exec=/usr/share/harbour-whatsapp/daemon/harbour-whatsapp-daemon.py
+SystemdService=harbour-whatsapp-daemon.service

@@ -5,5 +5,6 @@ Name[de]=WhatsApp
 Comment=WhatsApp Web for Sailfish OS
 Comment[de]=WhatsApp Web für Sailfish OS
 Icon=harbour-whatsapp
-Exec=harbour-whatsapp
+Exec=sailfish-qml harbour-whatsapp
 X-Nemo-Application-Type=silica-qt5
+X-Nemo-Single-Instance=yes

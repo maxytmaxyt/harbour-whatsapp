@@ -10,8 +10,6 @@ on:
   workflow_dispatch:
 
 env:
-  # Neuestes verfügbares SDK-Image
-  # https://hub.docker.com/r/coderus/sailfishos-platform-sdk/tags
   SFOS_RELEASE: 5.0.0.43
   SEGMENT_DOWNLOAD_TIMEOUT_MINS: 5
 
@@ -27,7 +25,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -44,7 +42,7 @@ jobs:
         run: ls -lh RPMS/
 
       - name: Artefakte hochladen
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v4
         with:
           name: harbour-whatsapp-${{ matrix.arch }}-rpm
           path: RPMS/*.rpm
@@ -62,22 +60,22 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
 
       - name: Artefakte herunterladen (aarch64)
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@v4
         with:
           name: harbour-whatsapp-aarch64-rpm
           path: release-rpms
 
       - name: Artefakte herunterladen (armv7hl)
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@v4
         with:
           name: harbour-whatsapp-armv7hl-rpm
           path: release-rpms
 
       - name: Artefakte herunterladen (i486)
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@v4
         with:
           name: harbour-whatsapp-i486-rpm
           path: release-rpms
@@ -85,13 +83,79 @@ jobs:
       - name: RPMs auflisten
         run: ls -lh release-rpms/
 
+      - name: Release Notes generieren
+        id: notes
+        run: |
+          VERSION="${{ github.ref_name }}"
+          cat > release_notes.md << NOTES
+          ## 📦 Installation
+
+          ### Schritt 1 — Abhängigkeiten installieren
+
+          Öffne das Terminal auf deinem Sailfish-Gerät und führe folgendes aus:
+
+          \`\`\`bash
+          pkcon install qt5-qtwebview nemo-qml-plugin-dbus-qt5 nemo-qml-plugin-notifications-qt5 python3 python3-dbus
+          \`\`\`
+
+          > **Tipp:** Die meisten dieser Pakete sind auf aktuellen Sailfish-Versionen bereits vorinstalliert.
+          > Wenn ein Paket nicht gefunden wird, ist es wahrscheinlich schon vorhanden.
+
+          ### Schritt 2 — Richtige RPM für dein Gerät wählen
+
+          | Datei | Gerät |
+          |-------|-------|
+          | \`harbour-whatsapp-*-aarch64.rpm\` | Xperia 10 II / III / IV / V, Xperia 1 II/III, andere moderne 64-bit Geräte |
+          | \`harbour-whatsapp-*-armv7hl.rpm\` | Jolla 1, Xperia X, Xperia XA2, ältere 32-bit ARM-Geräte |
+          | \`harbour-whatsapp-*-i486.rpm\` | Sailfish OS Emulator / SDK |
+
+          ### Schritt 3 — RPM installieren
+
+          **Option A: Terminal**
+          \`\`\`bash
+          pkcon install-local harbour-whatsapp-${VERSION}-1.<arch>.rpm
+          \`\`\`
+
+          **Option B: Datei-Manager**
+          RPM auf das Gerät kopieren → im Datei-Manager antippen → installieren.
+
+          ### Schritt 4 — Beim ersten Start
+
+          1. App öffnen
+          2. QR-Code mit deinem Handy scannen (WhatsApp → Verknüpfte Geräte → Gerät verknüpfen)
+          3. Fertig! Die Session bleibt dauerhaft gespeichert.
+
+          ---
+
+          ## 🔔 Hintergrund-Benachrichtigungen
+
+          Der Daemon wird beim ersten Start automatisch als systemd-User-Service eingerichtet.
+          Falls Benachrichtigungen nicht funktionieren:
+
+          \`\`\`bash
+          systemctl --user status harbour-whatsapp-daemon
+          systemctl --user restart harbour-whatsapp-daemon
+          # Logs anzeigen:
+          journalctl --user -u harbour-whatsapp-daemon -f
+          \`\`\`
+
+          ---
+
+          ## ❌ Deinstallieren
+
+          \`\`\`bash
+          pkcon remove harbour-whatsapp
+          \`\`\`
+          NOTES
+          echo "notes_file=release_notes.md" >> $GITHUB_OUTPUT
+
       - name: Release erstellen und RPMs hochladen
-        uses: softprops/action-gh-release@v3
+        uses: softprops/action-gh-release@v2
         with:
-          name: "${{ github.ref_name }}"
+          name: "harbour-whatsapp ${{ github.ref_name }}"
+          body_path: release_notes.md
           draft: false
           prerelease: false
-          generate_release_notes: true
           files: release-rpms/*.rpm
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
